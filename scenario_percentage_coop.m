@@ -25,7 +25,7 @@ lastsize = fprintf('Running generation 1.');
 
 % Create original ancestors
 for i = 1:game.num_prisoners
-    prisoners{i} = Strategy(cooperations(1, i), 0, 0, @df_cooperation);
+    prisoners{i} = Strategy(cooperations(1, i), 0, 0, 0, @df_cooperation);
 end
 
 % Run game
@@ -63,7 +63,7 @@ for gen = 2:game.num_generations
     
     % Create offspring
     for i = 1:game.num_prisoners
-        prisoners{i} = Strategy(cooperations(gen, i), 0, 0, @df_cooperation);
+        prisoners{i} = Strategy(cooperations(gen, i), 0, 0, 0, @df_cooperation);
     end
     
     % Run game

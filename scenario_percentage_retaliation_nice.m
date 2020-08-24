@@ -123,19 +123,19 @@ for gen = 2:game.num_generations
     end
     
     % Nice guy injection
-%     if gen == 10
-%         for ix = 1:15
-%             cooperations(gen, ix) = 1;
-%             retaliations(gen, ix) = 1;
-%             retaliations_windows(gen, ix) = game.max_retaliation_window;
-%             forgiveness_windows(gen, ix) = 1;
-%             prisoners{ix} = Strategy(cooperations(gen, ix), ...
-%                                     retaliations(gen, ix), ...
-%                                     retaliations_windows(gen, ix), ...
-%                                     forgiveness_windows(gen, i), ...
-%                                     @df_retaliation);
-%         end
-%     end
+    if gen == 10
+        for ix = 1:15
+            cooperations(gen, ix) = 1;
+            retaliations(gen, ix) = 1;
+            retaliations_windows(gen, ix) = game.max_retaliation_window;
+            forgiveness_windows(gen, ix) = 1;
+            prisoners{ix} = Strategy(cooperations(gen, ix), ...
+                                    retaliations(gen, ix), ...
+                                    retaliations_windows(gen, ix), ...
+                                    forgiveness_windows(gen, i), ...
+                                    @df_retaliation);
+        end
+    end
     
     % Run game
     for i = 1:game.num_prisoners
@@ -163,3 +163,10 @@ fprintf('\n')
 toc
 
 set(gcf, 'Units', 'Normalized', 'OuterPosition', [0, 0.04, 1, 0.96]);
+
+figure
+plot(mean_scores, 'xk')
+title('Scores vs. Generation', 'FontSize', 16)
+ylabel('Scores', 'FontSize', 16)
+xlabel('Generation', 'FontSize', 16)
+xline(10)

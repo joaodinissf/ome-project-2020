@@ -9,6 +9,15 @@ function [score_a, score_b] = one_on_one(game, strategy_a, strategy_b)
         d_a = strategy_a.decide(i, strategy_a, strategy_b, decisions_a, decisions_b);
         d_b = strategy_b.decide(i, strategy_b, strategy_a, decisions_b, decisions_a);
         
+        r = rand();
+        if r < game.channel_noise
+            d_a = ~d_a;
+        end
+        r = rand();
+        if r < game.channel_noise
+            d_b = ~d_b;
+        end
+        
         decisions_a{i} = d_a;
         decisions_b{i} = d_b;
         

@@ -1,4 +1,4 @@
-function plot_generation_multi_window(fig, figs, gen, game, prisoners, most_fit)
+function plot_generation_multi_forgiveness_window(fig, figs, gen, game, prisoners, most_fit)
     subplot(1, figs, fig);
     hold on
     marker_size = 16;
@@ -10,17 +10,17 @@ function plot_generation_multi_window(fig, figs, gen, game, prisoners, most_fit)
     
     coops = zeros(size(beta));
     for i = 1:length(coops)
-        coops(i) = beta{i}.GrudgePeriod;
+        coops(i) = beta{i}.ForgivenessPeriod;
     end    
     plot(gen .* ones(1, length(beta)), coops, '.b', 'MarkerSize', marker_size)
     
     coops = zeros(size(alpha));
     for i = 1:length(coops)
-        coops(i) = alpha{i}.GrudgePeriod;
+        coops(i) = alpha{i}.ForgivenessPeriod;
     end
     plot(gen .* ones(1, length(alpha)), coops, '.r', 'MarkerSize', marker_size)
     
-    title('Retaliation Window', 'FontSize', 18)
+    title('Forgiveness Window', 'FontSize', 18)
     xlabel('Generation')
     ylabel('Window Size')
     axis('tight')

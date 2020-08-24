@@ -1,8 +1,10 @@
 function game = create_game()
     % Number of prisoners, generations and iterations
-    game.num_prisoners = 30;
+    game.num_prisoners = 50;
     game.num_generations = 20;
     game.num_iters = 10;
+    game.max_retaliation_window = 10;
+    game.channel_noise = 0.1;
     
     % Rewards
     game.cc = 2;
@@ -11,8 +13,8 @@ function game = create_game()
     game.dd = 0;
     
     % Intensity of mutations
-    game.alpha_mutations = 0.75;
-    game.alpha_mutations = game.alpha_mutations .^ ((1:game.num_generations) - 1);
+    game.alpha_mutations = 0.35;
+    game.alpha_mutations = game.alpha_mutations * 0.97 .^ ((1:game.num_generations) - 1);
     game.alpha_mutations = repmat(game.alpha_mutations', 1, game.num_prisoners);
 
     % How many parents generate offspring?
