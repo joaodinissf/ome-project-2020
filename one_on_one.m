@@ -1,20 +1,32 @@
 function [score_a, score_b] = one_on_one(game, strategy_a, strategy_b)
-    decisions_a = zeros(1, game.num_iters);
-    decisions_b = zeros(1, game.num_iters);
+    decisions_a = cell(1, game.num_iters);
+    decisions_b = cell(1, game.num_iters);
     
     score_a = 0;
     score_b = 0;
     
     for i = 1:game.num_iters
-        decision_a = strategy_a.decide(strategy_a, strategy_b, decisions_a(1:i-1), decisions_b(1:i-1));
-        decision_b = strategy_b.decide(strategy_b, strategy_a, decisions_b(1:i-1), decisions_a(1:i-1));
+        d_a = strategy_a.decide(i, strategy_a, strategy_b, decisions_a, decisions_b);
+        d_b = strategy_b.decide(i, strategy_b, strategy_a, decisions_b, decisions_a);
         
-        decisions_a(i) = decision_to_double(decision_a);
-        decisions_b(i) = decision_to_double(decision_b);
+        decisions_a{i} = d_a;
+        decisions_b{i} = d_b;
         
-        [s_a, s_b] = judge(game, decision_a, decision_b);
+        if d_a == Actions.Cooperate && d_b == Actions.Cooperate
+            s_a = game.cc;
+            s_b = game.cc;
+        elseif d_a == Actions.Defect && d_b == Actions.Cooperate
+            s_a = game.cd_w;
+            s_b = game.cd_l;
+        elseif d_a == Actions.Cooperate && d_b == Actions.Defect
+            s_a = game.cd_l;
+            s_b = game.cd_w;
+        elseif d_a == Actions.Defect && d_b == Actions.Defect
+            s_a = game.dd;
+            s_b = game.dd;
+        end
+
         score_a = score_a + s_a;
         score_b = score_b + s_b;
     end
-    
 end

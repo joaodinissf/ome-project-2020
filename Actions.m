@@ -1,5 +1,6 @@
 classdef Actions
-    enumeration
-        Cooperate, Defect
+    properties ( Constant = true )
+        Defect    =  0;
+        Cooperate =  1;
     end
 end

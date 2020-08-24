@@ -1,95 +1,95 @@
 % Reset execution environment
 clear; close all; clc
 
-% Ensure reproducibility + housekeeping
+%% Ensure reproducibility + housekeeping
 rng('default');
 rng(1);
 addpath('decision_functions');
+addpath('plotting');
 
 % Create Prisoner's Dilemma game
-cc = 2;
-cd_w = 3;
-cd_l = -1;
-dd = 0;
-num_iters = 20;
-game = create_game(cc, cd_w, cd_l, dd, num_iters);
+game = create_game();
 
 %% Create Prisoners
-num_prisoners = 20;
-num_generations = 15;
+prisoners = cell(game.num_prisoners, 1);
+mutations = rand(game.num_generations, game.num_prisoners) .* 2 - 1;
+cooperations = zeros(game.num_generations, game.num_prisoners);
+scores = zeros(game.num_generations, game.num_prisoners, game.num_prisoners);
 
-prisoners = cell(num_prisoners, 1);
-
-alpha_mutations = 0.7;
-alpha_mutations = alpha_mutations .^ ((1:num_generations) - 1);
-alpha_mutations = repmat(alpha_mutations', 1, num_prisoners);
-
-alpha_reproducing = 0.2;
-
-mutations = rand(num_generations, num_prisoners);
-
-coops = zeros(num_generations, num_prisoners);
-mean_coop = zeros(num_generations, 1);
-
-scores = zeros(num_generations, num_prisoners, num_prisoners);
-mean_scores = zeros(num_generations, num_prisoners);
-
+%% Prepare first generation
 tic
-% Prepare first generation
-coops(1, :) = rand(1, num_prisoners);
+
+cooperations(1, :) = rand(1, game.num_prisoners);
 
 lastsize = fprintf('Running generation 1.');
 
-for i = 1:num_prisoners
-    prisoners{i} = Strategy(coops(1, i), 0, @df_cooperation_factor);
+% Create original ancestors
+for i = 1:game.num_prisoners
+    prisoners{i} = Strategy(cooperations(1, i), 0, 0, @df_cooperation);
 end
 
-for i = 1:num_prisoners
-    for j = i+1:num_prisoners
+% Run game
+for i = 1:game.num_prisoners
+    for j = i+1:game.num_prisoners
         [s_a, s_b] = one_on_one(game, prisoners{i}, prisoners{j});
         scores(1, i, j) = s_a;
         scores(1, j, i) = s_b;
     end
 end
 
-mean_scores(1, :) = sum(scores(1, :, :), 3) / (num_prisoners - 1);
+mean_scores(1, :) = sum(scores(1, :, :), 3) / (game.num_prisoners - 1);
 [sorted_score, most_fit] = sort(mean_scores(1, :), 'descend');
 
-most_fit = most_fit(1:round(alpha_reproducing*length(most_fit)));
+most_fit = most_fit(1:game.num_reproducing);
 
-% Advance generations
-for gen = 2:num_generations
+plot_generation(1, game, prisoners, most_fit);
+
+%% Advance generations
+for gen = 2:game.num_generations
     fprintf(repmat('\b', 1, lastsize));
     lastsize = fprintf('Running generation %d.', gen);
     
-    coops(gen, :) = mean(coops(gen-1, most_fit)) + alpha_mutations(gen, :) .* mutations(gen, :);
-    coops(coops > 1) = 1;
-    coops(coops < 0) = 0;
-    
-    for i = 1:num_prisoners
-        prisoners{i} = Strategy(coops(gen, i), 0, @df_cooperation_factor);
+    % Define offspring
+    for i = 1:game.num_prisoners
+        r = rand();
+        parent = find(r < game.alpha_fitness);
+        parent = most_fit(parent(1));
+        cooperations(gen, i) = cooperations(gen-1, parent) + game.alpha_mutations(gen, i) .* mutations(gen, i);
     end
-
-    for i = 1:num_prisoners
-        for j = i+1:num_prisoners
+    
+    % Sanitize cooperation values
+    cooperations(cooperations > 1) = 1;
+    cooperations(cooperations < 0) = 0;
+    
+    % Create offspring
+    for i = 1:game.num_prisoners
+        prisoners{i} = Strategy(cooperations(gen, i), 0, 0, @df_cooperation);
+    end
+    
+    % Run game
+    for i = 1:game.num_prisoners
+        for j = i+1:game.num_prisoners
             [s_a, s_b] = one_on_one(game, prisoners{i}, prisoners{j});
             scores(gen, i, j) = s_a;
             scores(gen, j, i) = s_b;
         end
     end
 
-    mean_scores(gen, :) = sum(scores(gen, :, :), 3) / (num_prisoners - 1);
+    mean_scores(gen, :) = sum(scores(gen, :, :), 3) / (game.num_prisoners - 1);
     [sorted_score, most_fit] = sort(mean_scores(gen, :), 'descend');
 
-    most_fit = most_fit(1:round(alpha_reproducing*length(most_fit)));
+    most_fit = most_fit(1:round(game.alpha_reproducing*length(most_fit)));
+    
+    plot_generation(gen, game, prisoners, most_fit);
 end
 
 fprintf('\n')
 
 toc
 
-plot(repmat((1:num_generations)', 1, num_prisoners), coops, 'xb')
-
-% TODO Plot best-performing of every generation in a different colour, maybe?
-% hold on
-% plot(
+title('Cooperation', 'FontSize', 20)
+xlabel('Generation', 'FontSize', 16)
+ylabel('% Cooperation', 'FontSize', 16)
+xlim([0 game.num_generations + 1])
+xticks(1:game.num_generations)
+ylim([0 1])

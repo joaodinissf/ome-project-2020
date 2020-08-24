@@ -1,16 +1,27 @@
-function game = create_game(cc, cd_w, cd_l, dd, num_iters)
-    if nargin ~= 4
-        cc = 2;
-        cd_w = 3;
-        cd_l = -1;
-        dd = 0;
-        num_iters = 100;
-    end
-
-    game.cc = cc;
-    game.cd_w = cd_w;
-    game.cd_l = cd_l;
-    game.dd = dd;
+function game = create_game()
+    % Number of prisoners, generations and iterations
+    game.num_prisoners = 30;
+    game.num_generations = 20;
+    game.num_iters = 10;
     
-    game.num_iters = num_iters;
+    % Rewards
+    game.cc = 2;
+    game.cd_w = 3;
+    game.cd_l = -1;
+    game.dd = 0;
+    
+    % Intensity of mutations
+    game.alpha_mutations = 0.75;
+    game.alpha_mutations = game.alpha_mutations .^ ((1:game.num_generations) - 1);
+    game.alpha_mutations = repmat(game.alpha_mutations', 1, game.num_prisoners);
+
+    % How many parents generate offspring?
+    game.alpha_reproducing = 0.2;
+    game.num_reproducing = round(game.alpha_reproducing * game.num_prisoners);
+    
+    % How much more do the most fit elements of the population reproduce?
+    game.alpha_fitness = 0.7;
+    game.alpha_fitness = game.alpha_fitness .^ (1:game.num_reproducing);
+    game.alpha_fitness = game.alpha_fitness / sum(game.alpha_fitness);    
+    game.alpha_fitness = cumsum(game.alpha_fitness);
 end
